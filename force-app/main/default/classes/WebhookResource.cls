@@ -27,8 +27,17 @@ global without sharing class WebhookResource {
     @HttpPost
     global static ResponseWrapper doPost() {
         // TODO: Implement webhook processing logic
-        return new ResponseWrapper('error', 'Method not implemented');
+        RestRequest request = RestContext.request;
+        RestResponse response = RestContext.response;
+        try{
+            String webhookType = getWebhookTypeFromPath(request.requestURI);
+            WebhookFactory.processWebhook(webhookType, request);
+            return new ResponseWrapper('success', 'Jira webhook processed successfully');
+        } catch (Exception e) {
+            System.debug('Webhook processing failed: ' + e.getMessage());
+        return new ResponseWrapper('error', e.getMessage());
     }
+}
     
     /**
      * @description Extracts the webhook type from the URL path
